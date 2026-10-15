@@ -1,0 +1,145 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+    dependencies {
+        classpath "net.serenity-bdd:serenity-gradle-plugin:5.3.9"
+    }
+}
+
+plugins {
+    id 'java'
+    id 'idea'
+}
+apply plugin: 'net.serenity-bdd.serenity-gradle-plugin'
+
+group = 'co.com.jeat.qa.ui'
+version = '1.0-SNAPSHOT'
+
+ext {
+    serenityVersion = '5.3.9'
+    cucumberVersion = '7.24.0'
+    junitBoomVersion = '5.13.1'
+    lombokVersion = '1.18.38'
+    apachePoiVersion = '5.5.1'
+    jacksonVersion = '2.21.5'
+    logbackVersion = '1.5.34'
+    log4jVersion = '2.25.5'
+    jdbiVersion = '3.45.2'
+    postgresVersion = '42.7.12'
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+java{
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+
+dependencies {
+    // ---- BOMs: alinean todas las versiones de cada familia de dependencias (incluye las transitivas) ----
+    implementation platform("com.fasterxml.jackson:jackson-bom:$jacksonVersion")
+    implementation platform("org.junit:junit-bom:$junitBoomVersion")
+    implementation platform("io.cucumber:cucumber-bom:$cucumberVersion")
+
+    // ---- Dependencias de Serenity ----
+    implementation "net.serenity-bdd:serenity-core:$serenityVersion"
+    implementation("net.serenity-bdd:serenity-ensure:$serenityVersion")
+    implementation("net.serenity-bdd:serenity-screenplay:$serenityVersion")
+    implementation("net.serenity-bdd:serenity-screenplay-rest:$serenityVersion")
+    implementation("net.serenity-bdd:serenity-screenplay-webdriver:$serenityVersion")
+    implementation("net.serenity-bdd:serenity-cucumber:$serenityVersion")
+    implementation("org.json:json:20231013")
+
+    // ---- Dependencias de Lombok ----
+    compileOnly("org.projectlombok:lombok:$lombokVersion")
+    annotationProcessor("org.projectlombok:lombok:$lombokVersion")
+    testCompileOnly("org.projectlombok:lombok:$lombokVersion")
+    testAnnotationProcessor("org.projectlombok:lombok:$lombokVersion")
+
+    // ---- Dependencias de Logback ----
+    implementation("ch.qos.logback:logback-classic:$logbackVersion")
+    implementation("org.apache.logging.log4j:log4j-api:$log4jVersion")
+    implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
+
+    // ---- Dependencias de Cucumber ----
+    implementation("io.cucumber:cucumber-java:$cucumberVersion")
+    implementation("io.cucumber:cucumber-junit-platform-engine:$cucumberVersion")
+
+    // ---- Dependencias de JUnit 5 ----
+    implementation("org.junit.jupiter:junit-jupiter-api:$junitBoomVersion")
+    implementation("org.junit.jupiter:junit-jupiter-params:$junitBoomVersion")
+
+    // ---- Dependencias de Apache POI ----
+    implementation("org.apache.poi:poi:$apachePoiVersion")
+    implementation("org.apache.poi:poi-ooxml:$apachePoiVersion")
+
+    // ---- Dependencias de JDBI ----
+    implementation("org.jdbi:jdbi3-core:$jdbiVersion")
+    implementation("org.postgresql:postgresql:$postgresVersion")
+
+    // ---- Dependencias de pruebas ----
+    testImplementation("net.serenity-bdd:serenity-cucumber:$serenityVersion")
+    testImplementation "io.cucumber:cucumber-junit-platform-engine"
+    testImplementation "org.junit.platform:junit-platform-suite"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine"
+    testImplementation "org.junit.vintage:junit-vintage-engine"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+
+    implementation "org.apache.poi:poi:$apachePoiVersion"
+    implementation "org.apache.poi:poi-ooxml:$apachePoiVersion"
+    testImplementation group : 'com.nordstrom.tools', name: 'junit-foundation', version: '17.1.1'
+
+    // ---- Constrains: permiten definir versiones de dependencias transitivas ----
+//    constraints {
+//        implementation("ch.qos.logback:logback-classic:$logbackVersion"){
+//            because("CVE-2026-10532, CVE-2026-9828")
+//        }
+//        implementation("org.assertj:assertj-core:3.27.7"){
+//            because("CVE-2026-10532, CVE-2026-9828")
+//        }
+//        implementation("org.apache.commons:commons-lang3:3.19.0"){
+//            because("CVE-2026-10532, CVE-2026-9828")
+//        }
+//        implementation("org.apache.commons:commons-configuration2:2.15.0"){
+//            because("CVE-2026-10532, CVE-2026-9828")
+//        }
+//        implementation("commons-beanutils:commons-beanutils:1.11.0"){
+//            because("CVE-2026-10532, CVE-2026-9828")
+//        }
+//        implementation("com.thoughtworks.xstream:xstream:1.4.23"){
+//            because("CVE-2026-10532, CVE-2026-9828")
+//        }
+//        implementation("io.telemetry:opentelemetry-api:1.62.0"){
+//            because("CVE-2026-10532, CVE-2026-9828")
+//        }
+//        implementation("com.google.protobuf:protobuf-java:4.28.2"){
+//            because("CVE-2026-10532, CVE-2026-9828")
+//        }
+//    }
+}
+
+test {
+    useJUnitPlatform()
+    systemProperty 'USER', System.getProperty('USER')
+}
+
+serenity{
+    testRoot = "test-api"
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Javadoc) {
+    options.encoding = 'UTF-8'
+}
+
+test.finalizedBy(aggregate)
